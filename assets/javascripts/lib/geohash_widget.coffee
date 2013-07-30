@@ -1,7 +1,7 @@
 define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
   _determineGeohashPrecision = (lat_diff, lng_diff) ->
-    # These values are calculated by initially diving 360 by 8 (for lngs) and 180 by 4 (for lngs)
+    # These values are calculated by initially diving 360 by 8 (for lngs) and 180 by 4 (for lats)
     # Then for lats, divide the result by 8 and for lngs divide by 4
     # Then alternate: for lats, divide the result by 4 and for lngs divide by 8
 
@@ -141,9 +141,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
           requestType = layer.requestType
           version = layer.version
           label = layer.label
-          #imageType = if layer.isPng then 'png' else 'jpeg'
           tileLayer = L.tileLayer("#{opts.mapUrl}/query?request=#{requestType}&channel=#{channel}&version=#{version}&x={x}&y={y}&z={z}", {
-            #attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
             minZoom: 1
             maxZoom: 18
           }).addTo(@map)
@@ -212,7 +210,6 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
           @bboxLayer = null
 
       @map.on 'draw:created', (e) =>
-        type = e.layerType
         @bboxLayer = e.layer
         bounds = @bboxLayer.getBounds()
         console.log bounds
@@ -235,13 +232,8 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
           callback(data)
 
     _determineDataset: (bounds) ->
-      north = bounds.getNorth()
-      south = bounds.getSouth()
-      east = bounds.getEast()
-      west = bounds.getWest()
-
-      lat_diff = Math.abs(north - south)
-      lng_diff = Math.abs(east - west)
+      lat_diff = Math.abs(bounds.getNorth() - bounds.getSouth())
+      lng_diff = Math.abs(bounds.getEast() - bounds.getWest())
 
       console.log "lat_diff", lat_diff
       console.log "lng_diff", lng_diff
