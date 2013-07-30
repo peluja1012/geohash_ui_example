@@ -1,4 +1,4 @@
-define ['jquery', 'app/geohash_widget'], ($, GeohashWidget) ->
+define ['jquery', 'lib/geohash_widget'], ($, GeohashWidget) ->
   
   widget = null
 
