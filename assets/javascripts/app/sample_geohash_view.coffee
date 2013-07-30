@@ -13,7 +13,6 @@ define ['backbone', './geohash_widget'], (Backbone, GeohashWidget) ->
       @render()
       @fetchData()
 
-
     render: ->
       @renderTemplate "sample_geohash_view", {}
 
