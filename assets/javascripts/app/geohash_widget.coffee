@@ -1,4 +1,37 @@
-define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
+define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
+
+  _determineGeohashPrecision = (lat_diff, lng_diff) ->
+    # These values are calculated by initially diving 360 by 8 (for lngs) and 180 by 4 (for lngs)
+    # Then for lats, divide the result by 8 and for lngs divide by 4
+    # Then alternate: for lats, divide the result by 4 and for lngs divide by 8
+
+    if lng_diff < 0.04394
+      lng_precision = 6
+    else if lng_diff < 0.3515
+      lng_precision = 5
+    else if lng_diff < 1.406
+      lng_precision = 4
+    else if lng_diff < 11.25
+      lng_precision = 3
+    else if lng_diff < 45
+      lng_precision = 2
+    else
+      lng_precision = 1
+
+    if lat_diff < 0.04394
+      lat_precision = 6
+    else if lat_diff < 0.1757
+      lat_precision = 5
+    else if lat_diff < 1.40625
+      lat_precision = 4
+    else if lat_diff < 5.625
+      lat_precision = 3
+    else if lat_diff < 45
+      lat_precision = 2
+    else
+      lat_precision = 1
+
+    Math.min(lat_precision,lng_precision)
 
   class GeoHashWidget
 
@@ -6,7 +39,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
       @map = null
       @handlers = {}
       @bboxLayer = null
-      @geoHashDataSets = 
+      @geoHashDataSets =
         set_1: null
         set_2: null
         set_3: null
@@ -22,76 +55,6 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
 
       @handlers[name].push callback
 
-    _publish: (name, data) ->
-      if @handlers[name]?
-        for callback in @handlers[name]
-          callback(data)
-
-    _determineGeohashPrecision: (lat_diff, lng_diff) ->
-      # These values are calculated by initially diving 360 by 8 (for lngs) and 180 by 4 (for lngs)
-      # Then for lats, divide the result by 8 and for lngs divide by 4
-      # Then alternate: for lats, divide the result by 4 and for lngs divide by 8
-
-      if lng_diff < 0.04394 
-        lng_precision = 6
-      else if lng_diff < 0.3515
-        lng_precision = 5
-      else if lng_diff < 1.406
-        lng_precision = 4
-      else if lng_diff < 11.25
-        lng_precision = 3
-      else if lng_diff < 45
-        lng_precision = 2
-      else
-        lng_precision = 1
-
-      if lat_diff < 0.04394
-        lat_precision = 6
-      else if lat_diff < 0.1757
-        lat_precision = 5
-      else if lat_diff < 1.40625
-        lat_precision = 4
-      else if lat_diff < 5.625
-        lat_precision = 3
-      else if lat_diff < 45
-        lat_precision = 2
-      else
-        lat_precision = 1
-
-      Math.min(lat_precision,lng_precision)
-
-    _determineDataset: (bounds) ->
-      north = bounds.getNorth()
-      south = bounds.getSouth()
-      east = bounds.getEast()
-      west = bounds.getWest()
-      
-      lat_diff = Math.abs(north - south)
-      lng_diff = Math.abs(east - west)
-
-      console.log "lat_diff", lat_diff
-      console.log "lng_diff", lng_diff
-      precision = @_determineGeohashPrecision(lat_diff, lng_diff)
-      console.log "precision", precision
-      @geoHashDataSets["set_#{precision}"]
-
-
-    _populateHeatmapData: ->
-      return unless @map?
-
-      viewport =  @map.getBounds()
-      goodPoints = []
-      geoHashData = @_determineDataset(viewport)
-      if geoHashData?
-        for point in geoHashData
-          p = new L.LatLng(point.lat, point.lon)
-          if viewport.contains(p)
-            goodPoints.push point
-        console.log "setting points"
-        console.log goodPoints.length
-        if goodPoints.length > 0
-          @heatmapLayer.setData(goodPoints)
-
     resetData: (dataSets) ->
       for dataSet, i in dataSets
         @geoHashDataSets["set_#{i+1}"] = dataSet
@@ -99,7 +62,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
       @_populateHeatmapData()
 
     bbox: (north, east, south, west) ->
-      rectOpts = 
+      rectOpts =
         stroke: true
         color: '#f06eaa'
         weight: 4
@@ -126,7 +89,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
 
       @_publish 'bboxDrawn', data
 
-    
+
     deleteBbox: ->
       if @bboxLayer?
         console.log "deleted removing layer"
@@ -145,14 +108,14 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
         throw new Error('Please provide a value for the [el] option')
       unless opts.mapUrl?
         throw new Error('Please provide a value for the [mapUrl] option')
-      
+
       if opts.imagePath?
         L.Icon.Default.imagePath = "#{opts.imagePath}"
 
       @heatmapLayer = L.TileLayer.heatMap({
           # radius could be absolute or relative
           # absolute: radius in meters, relative: radius in pixels
-          radius: 
+          radius:
             value: 20
             absolute: false
           opacity: 0.8
@@ -163,12 +126,11 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
             0.95: "yellow"
             1.0: "rgb(255,0,0)"
       })
-      
+
       @map = L.map(opts.el, {layers:[@heatmapLayer]}).setView([0, 0], 1)
-      
+
       overlayMaps = {}
       baseMaps = {}
-
 
       overlayMaps.heat = @heatmapLayer
 
@@ -196,23 +158,21 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
       # Drawing toolbar
       @drawnItems = new L.FeatureGroup()
       @map.addLayer(@drawnItems)
-      drawControl = new L.Control.Draw({
-        draw: 
+      drawControl = new L.Control.Draw
+        draw:
           polyline: false
           polygon: false
           circle: false
           marker: false
-        edit: {
-            featureGroup: @drawnItems
-        }
-      })
+        edit:
+          featureGroup: @drawnItems
       @map.addControl(drawControl)
 
       # Register to events
       @_registerToDrawEvents()
       @_registerToMoveEvents()
 
-    
+
     _registerToMoveEvents: ->
       @map.on 'moveend', (e) =>
       console.log "on moveend"
@@ -269,4 +229,39 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
         @drawnItems.addLayer(@bboxLayer)
 
 
-  GeoHashWidget
+    _publish: (name, data) ->
+      if @handlers[name]?
+        for callback in @handlers[name]
+          callback(data)
+
+    _determineDataset: (bounds) ->
+      north = bounds.getNorth()
+      south = bounds.getSouth()
+      east = bounds.getEast()
+      west = bounds.getWest()
+
+      lat_diff = Math.abs(north - south)
+      lng_diff = Math.abs(east - west)
+
+      console.log "lat_diff", lat_diff
+      console.log "lng_diff", lng_diff
+      precision = _determineGeohashPrecision(lat_diff, lng_diff)
+      console.log "precision", precision
+      @geoHashDataSets["set_#{precision}"]
+
+
+    _populateHeatmapData: ->
+      return unless @map?
+
+      viewport =  @map.getBounds()
+      goodPoints = []
+      geoHashData = @_determineDataset(viewport)
+      if geoHashData?
+        for point in geoHashData
+          p = new L.LatLng(point.lat, point.lon)
+          if viewport.contains(p)
+            goodPoints.push point
+        console.log "setting points"
+        console.log goodPoints.length
+        if goodPoints.length > 0
+          @heatmapLayer.setData(goodPoints)
