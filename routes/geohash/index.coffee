@@ -3209,12 +3209,9 @@ geoTerms = [
 ##
 exports.getData = (req, res) ->
   geoTerm = geoTerms[0].term
-  console.log geoTerm
   latlng = geohash.decodeGeoHash(geoTerm)
   lat = latlng.latitude[2]
   lng = latlng.longitude[2]
-  console.log lat
-  console.log lng
   
   latlngTerms = []
   for term in geoTerms
