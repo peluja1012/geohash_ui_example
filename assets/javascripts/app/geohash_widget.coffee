@@ -1,4 +1,4 @@
-define ['jquery', 'leaflet', 'leaflet_draw', 'leaflet_markercluster', 'leaflet_heatmap'], ($) ->
+define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], () ->
 
   class GeoHashWidget
 
@@ -208,9 +208,6 @@ define ['jquery', 'leaflet', 'leaflet_draw', 'leaflet_markercluster', 'leaflet_h
       })
       @map.addControl(drawControl)
 
-      # Draw Clusters
-      #@_drawMarkerClusters()
-
       # Register to events
       @_registerToDrawEvents()
       @_registerToMoveEvents()
@@ -271,16 +268,5 @@ define ['jquery', 'leaflet', 'leaflet_draw', 'leaflet_markercluster', 'leaflet_h
 
         @drawnItems.addLayer(@bboxLayer)
 
-
-    _drawMarkerClusters: ->
-      markers = new L.MarkerClusterGroup({ singleMarkerMode: true})
-      $.ajax
-        url: '/geohashdata'
-        success: (data) ->
-          terms = data.geoHashData
-          for term in terms
-            markers.addLayer(new L.Marker(new L.LatLng(term.term.lat, term.term.lng)))
-
-      @map.addLayer(markers)
 
   GeoHashWidget
