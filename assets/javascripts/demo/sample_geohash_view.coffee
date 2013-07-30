@@ -1,4 +1,4 @@
-define ['backbone', './geohash_widget'], (Backbone, GeohashWidget) ->
+define ['backbone', 'lib/geohash_widget'], (Backbone, GeohashWidget) ->
 
   class SampleGeohashView extends Backbone.View
 

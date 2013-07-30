@@ -1,9 +1,10 @@
 requirejs.config
+  baseUrl: "javascripts"
   urlArgs: "b=#{(new Date()).getTime()}"
   paths:
     jquery: 'vendor/jquery'
     underscore: 'vendor/lodash.min'
-    backbone: 'common/util/backbone-extended'
+    backbone: 'vendor/backbone-extended'
     leaflet: 'vendor/leaflet-src'
     leaflet_draw: 'vendor/leaflet.draw-src'
     leaflet_markercluster: 'vendor/leaflet.markercluster-src'
