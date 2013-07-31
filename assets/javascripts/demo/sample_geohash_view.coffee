@@ -26,15 +26,16 @@ define ['backbone', 'berico/geohash_widget'], (Backbone, GeohashWidget) ->
       $.ajax
         url: '/geohashdata'
         success: (data) =>
-          terms = data.geoHashData
-          points = []
-          count = 0
-          for term in terms
-            if count > 2
-              points.push {lat:term.term.lat, lon:term.term.lng, value:term.count}
-            count++
-
-          @widget.resetData([points, points, points, points, points])
+          pointsArray = []
+          geoFacetsObj = data.docFacetResults.facets
+          for key in Object.keys(geoFacetsObj)
+            points = []
+            for term in geoFacetsObj[key].terms
+              points.push {lat:term.lat_lng.lat, lon:term.lat_lng.lng, value:term.count}
+            pointsArray.push points
+            
+          console.log pointsArray
+          @widget.resetData(pointsArray)
 
       @widget.bbox(55, 40, 50, 20)
       @widget.deleteBbox()
