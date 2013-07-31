@@ -1,4 +1,4 @@
-define ['backbone', 'berico/geohash_widget'], (Backbone, GeohashWidget) ->
+define ['underscore', 'backbone', 'berico/geohash_widget'], (_, Backbone, GeohashWidget) ->
 
   class SampleGeohashView extends Backbone.View
 
@@ -28,11 +28,16 @@ define ['backbone', 'berico/geohash_widget'], (Backbone, GeohashWidget) ->
         success: (data) =>
           pointsArray = []
           geoFacetsObj = data.docFacetResults.facets
-          for key in Object.keys(geoFacetsObj)
+          max = 0
+          for key, i in Object.keys(geoFacetsObj)
             points = []
+            # Calculate the max value of the highest level geohash dataset
+            if i is 0
+              maxTerm = _.max geoFacetsObj[key].terms, (term) -> term.count
+              max = maxTerm.count
             for term in geoFacetsObj[key].terms
               points.push {lat:term.lat_lng.lat, lon:term.lat_lng.lng, value:term.count}
-            pointsArray.push points
+            pointsArray.push {max: max, data: points}
             
           console.log pointsArray
           @widget.resetData(pointsArray)

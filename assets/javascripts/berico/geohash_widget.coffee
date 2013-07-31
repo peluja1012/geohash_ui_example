@@ -35,13 +35,38 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
     Math.min(lat_precision,lng_precision)
 
+  setDataWithMax = (obj) ->
+    self = @
+    latLngs = []
+    if obj.max?
+      @._maxValue = obj.max
+    else
+      @_maxValue = 0;
+    obj.data.forEach (d) ->
+      latLngs.push(new L.LatLng(d.lat, d.lon))
+      unless obj.max?
+        self._maxValue = Math.max(self._maxValue, d.value)
+    @_bounds = new L.LatLngBounds(latLngs);
+
+    @_quad = new QuadTree(@_boundsToQuery(@_bounds), false, 6, 6);
+
+    obj.data.forEach (d) ->
+      self._quad.insert({
+        x: d.lon,
+        y: d.lat,
+        value: d.value
+      })
+    @redraw()
+  
+  L.TileLayer.HeatMap::setData = setDataWithMax
+
   class GeohashWidget
 
     constructor: ->
       @map = null
       @handlers = {}
       @bboxLayer = null
-      @geoHashDataSets =
+      @geohashDataSets =
         set_1: null
         set_2: null
         set_3: null
@@ -59,7 +84,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
     resetData: (dataSets) ->
       for dataSet, i in dataSets
-        @geoHashDataSets["set_#{i+1}"] = dataSet
+        @geohashDataSets["set_#{i+1}"] = dataSet
 
       @_populateHeatmapData()
 
@@ -242,7 +267,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
       console.log "lng_diff", lng_diff
       precision = _determineGeohashPrecision(lat_diff, lng_diff)
       console.log "precision", precision
-      @geoHashDataSets["set_#{precision}"]
+      @geohashDataSets["set_#{precision}"]
 
 
     _populateHeatmapData: ->
@@ -250,16 +275,16 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
       viewport =  @map.getBounds()
       goodPoints = []
-      geoHashData = @_determineDataset(viewport)
-      if geoHashData?
-        for point in geoHashData
+      geohashData = @_determineDataset(viewport)
+      if geohashData?
+        for point in geohashData.data
           p = new L.LatLng(point.lat, point.lon)
           if viewport.contains(p)
             goodPoints.push point
         console.log "setting points"
         console.log goodPoints.length
         if goodPoints.length > 0
-          @heatmapLayer.setData(goodPoints)
+          @heatmapLayer.setData({max:geohashData.max, data:goodPoints})
 
   exports.Widget = GeohashWidget
   exports.Util =
