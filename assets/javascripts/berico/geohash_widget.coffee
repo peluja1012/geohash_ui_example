@@ -173,8 +173,8 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
     _registerToMoveEvents: ->
       @map.on 'moveend', (e) =>
-      console.log "on moveend"
-      @_populateHeatmapData()
+        console.log "on moveend"
+        @_populateHeatmapData()
 
     _registerToDrawEvents: ->
       @map.on 'draw:edited', (e) =>
