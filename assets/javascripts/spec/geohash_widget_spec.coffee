@@ -3,15 +3,24 @@ define ['jquery', 'berico/geohash_widget'], ($, GeohashWidget) ->
   widget = null
   Util = null
 
-  before ->
-    #$('body').append("<div id='mySearchesContainer'></div>");
+  beforeEach ->
+    $('body').append("<div id='map'></div>")
     widget = new GeohashWidget.Widget()
     Util = GeohashWidget.Util
 
+  afterEach ->
+    $('#map').remove()
+
   describe 'Geohash Widget', ->
 
-    it 'should be awesome', ->
-      expect(widget.map).to.equal(null)
+    it 'should enforce that required opts are provided when drawing', ->
+      expect(-> widget.draw()).to.throw(Error)
+      expect(-> widget.draw({})).to.throw(Error)
+      expect(-> widget.draw({el:'map'})).to.throw(Error)
+      expect(-> widget.draw({mapUrl:'hello'})).to.throw(Error)
+
+    it 'should allow optional opts to be missing when drawing', ->
+      expect(() -> widget.draw({el:'map', mapUrl:'hello'})).to.not.throw(Error)
 
     describe 'determining which geohash precision to use', ->
       it 'should work correctly when passed a large viewport', ->
