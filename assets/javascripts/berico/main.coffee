@@ -1,2 +1,0 @@
-require ['./geohash_widget'], ->
-
