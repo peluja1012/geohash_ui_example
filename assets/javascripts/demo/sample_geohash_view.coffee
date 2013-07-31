@@ -1,9 +1,9 @@
-define ['backbone', 'berico/geohash_widget'], (Backbone, GeohashWidget) ->
+define ['underscore', 'backbone', 'berico/geohash_widget'], (_, Backbone, GeohashWidget) ->
 
   class SampleGeohashView extends Backbone.View
 
     initialize: (opts) ->
-      @widget = new GeohashWidget()
+      @widget = new GeohashWidget.Widget()
       @widget.on 'bboxDrawn', (data) ->
         console.log "it was drawn!!!", data
 
@@ -26,15 +26,21 @@ define ['backbone', 'berico/geohash_widget'], (Backbone, GeohashWidget) ->
       $.ajax
         url: '/geohashdata'
         success: (data) =>
-          terms = data.geoHashData
-          points = []
-          count = 0
-          for term in terms
-            if count > 2
-              points.push {lat:term.term.lat, lon:term.term.lng, value:term.count}
-            count++
-
-          @widget.resetData([points, points, points, points, points])
+          pointsArray = []
+          geoFacetsObj = data.docFacetResults.facets
+          max = 0
+          for key, i in Object.keys(geoFacetsObj)
+            points = []
+            # Calculate the max value of the highest level geohash dataset
+            if i is 0
+              maxTerm = _.max geoFacetsObj[key].terms, (term) -> term.count
+              max = maxTerm.count
+            for term in geoFacetsObj[key].terms
+              points.push {lat:term.lat_lng.lat, lon:term.lat_lng.lng, value:term.count}
+            pointsArray.push {max: max, data: points}
+            
+          console.log pointsArray
+          @widget.resetData(pointsArray)
 
       @widget.bbox(55, 40, 50, 20)
       @widget.deleteBbox()
