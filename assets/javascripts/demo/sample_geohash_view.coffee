@@ -3,7 +3,7 @@ define ['backbone', 'berico/geohash_widget'], (Backbone, GeohashWidget) ->
   class SampleGeohashView extends Backbone.View
 
     initialize: (opts) ->
-      @widget = new GeohashWidget()
+      @widget = new GeohashWidget.Widget()
       @widget.on 'bboxDrawn', (data) ->
         console.log "it was drawn!!!", data
 

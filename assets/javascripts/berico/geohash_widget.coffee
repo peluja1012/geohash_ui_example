@@ -1,5 +1,7 @@
 define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
+  exports = {}
+
   _determineGeohashPrecision = (lat_diff, lng_diff) ->
     # These values are calculated by initially diving 360 by 8 (for lngs) and 180 by 4 (for lats)
     # Then for lats, divide the result by 8 and for lngs divide by 4
@@ -33,7 +35,7 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
 
     Math.min(lat_precision,lng_precision)
 
-  class GeoHashWidget
+  class GeohashWidget
 
     constructor: ->
       @map = null
@@ -142,8 +144,9 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
           version = layer.version
           label = layer.label
           tileLayer = L.tileLayer("#{opts.mapUrl}/query?request=#{requestType}&channel=#{channel}&version=#{version}&x={x}&y={y}&z={z}", {
+            noWrap: false
             minZoom: 1
-            maxZoom: 18
+            maxZoom: 16
           }).addTo(@map)
 
           if requestType is "ImageryMaps"
@@ -257,3 +260,8 @@ define ['leaflet', 'leaflet_draw', 'leaflet_heatmap'], ->
         console.log goodPoints.length
         if goodPoints.length > 0
           @heatmapLayer.setData(goodPoints)
+
+  exports.Widget = GeohashWidget
+  exports.Util =
+    determineGeohashPrecision: _determineGeohashPrecision
+  exports
