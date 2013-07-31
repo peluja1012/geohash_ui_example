@@ -1,5 +1,5 @@
-define ['jquery', 'lib/geohash_widget'], ($, GeohashWidget) ->
-  
+define ['jquery', 'berico/geohash_widget'], ($, GeohashWidget) ->
+
   widget = null
 
   before ->
