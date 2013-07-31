@@ -1,4 +1,4 @@
-define ['backbone', 'lib/geohash_widget'], (Backbone, GeohashWidget) ->
+define ['backbone', 'vendor/berico.heatMap'], (Backbone, GeohashWidget) ->
 
   class SampleGeohashView extends Backbone.View
 

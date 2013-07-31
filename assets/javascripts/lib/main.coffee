@@ -1,3 +1,2 @@
-require ['common'], ->
-  require ['./geohash_widget'], ->
+require ['./geohash_widget'], ->
 
